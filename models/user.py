@@ -1,4 +1,5 @@
 from bcrypt import hashpw, gensalt, checkpw
+from sqlalchemy import func
 from models import db
 
 class User(db.Model):
@@ -14,6 +15,7 @@ class User(db.Model):
     estado = db.Column(db.String(100), nullable=False)
     cidade = db.Column(db.String(150), nullable=False)
     admin = db.Column(db.Boolean, default=False, nullable=False)
+    criado_em = db.Column(db.DateTime, nullable=False, default=func.now())
     
     _posts = db.relationship('Post', back_populates='_user', cascade="all, delete-orphan")
     _curtidas = db.relationship('Curtida', back_populates='_user', cascade="all, delete-orphan")
@@ -35,6 +37,7 @@ class User(db.Model):
             'status': self.status,
             'estado': self.estado,
             'cidade': self.cidade,
-            'admin': self.admin
+            'admin': self.admin,
+            'criado_em': self.criado_em
         }
 

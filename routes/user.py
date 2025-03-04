@@ -17,7 +17,7 @@ def current_user(user_id):
     if request.method == 'GET':
         return jsonify({
             'user_id': user.id,
-            'username': user.username
+            'user': user.username
         }), 200
     
     elif request.method == 'DELETE':

@@ -1,6 +1,7 @@
 from config import ApplicationConfig
 from flask import Flask, jsonify
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 from routes.auth import auth_bp
 from routes.user import user_bp
@@ -13,6 +14,8 @@ from utils import token_required
 
 app = Flask(__name__)
 app.config.from_object(ApplicationConfig)
+
+CORS(app, supports_credentials=True, origins="*")
 
 db.init_app(app)
 migrate = Migrate(app, db)

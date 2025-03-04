@@ -25,18 +25,18 @@ def login():
 
         response = make_response(jsonify({
             "success": True,
-            "message": "Login realizado com sucesso"
+            "message": 'Login bem-sucedido!'
         }))
         
-        response.set_cookie('token', token, httponly=True, secure=True, max_age=datetime.timedelta(minutes=30), samesite='Lax')
+        response.set_cookie('token', token, httponly=True, secure=True, max_age=datetime.timedelta(minutes=30), samesite='None')
 
         return response
     
     return jsonify({"error": "Credenciais Inválidas"}), 401
 
-@auth_bp.route('/register', methods=['POST'])
+@auth_bp.route('/registro', methods=['POST'])
 @logout_required
-def register():
+def registro():
     data = request.json
     email = data.get('email')
     nome = data.get('nome')
@@ -79,7 +79,7 @@ def register():
 
     response = make_response(jsonify({
         "success": True,
-        "message": "Login realizado com sucesso"
+        "message": "Registro realizado com sucesso"
     }))
     
     response.set_cookie('token', token, httponly=True, secure=True, max_age=datetime.timedelta(minutes=30), samesite='Lax')
