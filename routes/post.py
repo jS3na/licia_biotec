@@ -1,3 +1,5 @@
+import datetime
+import os
 from flask import Blueprint, jsonify, redirect, render_template, request, session, url_for
 import jwt
 
@@ -6,7 +8,8 @@ from models.post import Post
 from models.curtida import Curtida
 from models.comentario import Comentario
 
-from utils import token_required, verify_login
+from utils import token_required, verify_login, allowed_file
+from werkzeug.utils import secure_filename
 
 from models import db
 
@@ -17,8 +20,6 @@ post_bp = Blueprint('post', __name__)
 def handle_posts(user_id):
     if request.method == 'GET':
         posts = Post.query.order_by(Post.criado_em.desc())
-        
-        print(user_id)
         
         posts_data = []
         for post in posts:
@@ -36,26 +37,29 @@ def handle_posts(user_id):
 
 @post_bp.route('/create', methods=['POST'])
 @token_required
-def handle_create_posts(user_id):
-    data = request.json
-    
-    imagem_url = data.get('imagem_url')
-    setor = data.get('setor')
-    achado = data.get('achado')
-    descricao = data.get('descricao')
-    user_id = user_id
-    
-    if not all([imagem_url, setor, achado, descricao]):
+def handle_create_post(user_id):
+    if 'imagem' not in request.files:
+        return jsonify({"error": "Preencha os campos obrigatórios"}), 400
+
+    imagem = request.files['imagem']
+    setor = request.form.get('setor')
+    achado = request.form.get('achado')
+    descricao = request.form.get('descricao')
+
+    if not all([setor, achado, descricao]):
         return jsonify({"error": "Preencha os campos obrigatórios"}), 400
     
+    filename = secure_filename(f'{datetime.datetime.utcnow()}+{user_id}+{imagem.filename}')
+    imagem.save(os.path.join(ApplicationConfig.UPLOAD_FOLDER, filename))
+
     post = Post(
-        imagem_url=imagem_url,
+        imagem_url=filename,
         setor=setor,
         achado=achado,
         descricao=descricao,
         user_id=user_id,
     )
-    
+
     db.session.add(post)
     db.session.commit()
 
@@ -88,7 +92,9 @@ def get_post(post_id, user_id):
         
 @post_bp.route('/<int:post_id>', methods=['PUT', 'DELETE'])
 @token_required
-def handle_post(post_id, user_id):
+def handle_edit_delete_post(post_id, user_id):
+    
+    post = Post.query.filter_by(id=post_id).first()
     
     if request.method == 'PUT':
         data = request.json

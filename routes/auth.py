@@ -4,7 +4,7 @@ from models import db
 import jwt
 import datetime
 from config import ApplicationConfig
-from utils import logout_required
+from utils import logout_required, token_required
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -88,8 +88,9 @@ def registro():
 
 
 @auth_bp.route('/logout')
-def logout():
-    response = make_response(jsonify({"message": "Logout successful"}))
+@token_required
+def logout(user_id):
+    response = make_response(jsonify({"message": "Logout realizado com sucesso"}))
     response.delete_cookie("token")
     session.clear()
     return response

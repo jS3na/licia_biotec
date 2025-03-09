@@ -3,6 +3,12 @@ from flask import jsonify, request
 import jwt
 from config import ApplicationConfig
 
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 def verify_login(f):
     @wraps(f)
     def decorated(*args, **kwargs):
